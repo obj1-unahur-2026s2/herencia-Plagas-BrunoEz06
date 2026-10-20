@@ -1,9 +1,72 @@
-import example.pepita
+import example.*
+describe "Tests del sistema de Plagas y sus ataques" {
 
-describe "group of tests for pepita" {
+    test "Plaga de cucarachas calcula daño y transmisión de enfermedades" {
+        const cucas = new Cucarachas(poblacion = 30, pesoPromedio = 8)
 
-  test "pepita has initial energy" {
-    assert.equals(100, pepita.energy())
-  }
+        assert.equals(15, cucas.daño())
+        
+        assert.notThat(cucas.transmitenEnfermedades())
 
+        cucas.cambiarPesoPromedio(10) 
+        assert.that(cucas.transmitenEnfermedades())
+    }
+
+    test "Plaga de mosquitos transmite enfermedades solo si la población es múltiplo de 3 y >= 10" {
+        const mosquitos = new Mosquitos(poblacion = 12)
+
+        assert.equals(12, mosquitos.daño())
+        assert.that(mosquitos.transmitenEnfermedades()) 
+
+        const mosquitosChicos = new Mosquitos(poblacion = 6)
+        assert.notThat(mosquitosChicos.transmitenEnfermedades()) 
+    }
+
+    test "Plaga de pulgas y garrapatas duplican su población como daño" {
+        const pulgas = new Pulgas(poblacion = 20)
+        assert.equals(40, pulgas.daño())
+        assert.that(pulgas.transmitenEnfermedades())
+    }
+
+
+    test "Ataque a un Hogar aumenta su nivel de mugre según el daño de la plaga" {
+        const hogar = new Hogar(nivelDeMugre = 10, comfort = 50)
+        const pulgas = new Pulgas(poblacion = 20) 
+
+        pulgas.atacarElemento(hogar)
+
+        assert.equals(50, hogar.nivelDeMugre())
+    }
+
+    test "Ataque a una Mascota disminuye su salud solo si la plaga transmite enfermedades" {
+        const mascota = new Mascota(nivelDeSalud = 300)
+        
+        const mosquitosSanos = new Mosquitos(poblacion = 9)
+        mosquitosSanos.atacarElemento(mascota)
+        assert.equals(300, mascota.nivelDeSalud()) 
+
+        const mosquitosEnfermos = new Mosquitos(poblacion = 12)
+        mosquitosEnfermos.atacarElemento(mascota)
+        assert.equals(288, mascota.nivelDeSalud()) 
+    }
+
+
+    test "Al atacar, la población de la plaga aumenta un 10% y las cucarachas ganan peso" {
+        const cucas = new Cucarachas(poblacion = 100, pesoPromedio = 10)
+        const hogar = new Hogar(nivelDeMugre = 0, comfort = 200)
+
+        cucas.atacarElemento(hogar)
+
+        assert.equals(110, cucas.poblacion())
+        assert.equals(12, cucas.pesoPromedio())
+    }
+
+    test "Las garrapatas aumentan su población un 20% al atacar" {
+        const garrapatas = new Garrapatas(poblacion = 100)
+        const hogar = new Hogar(nivelDeMugre = 0, comfort = 200)
+
+        garrapatas.atacarElemento(hogar)
+
+        assert.equals(120, garrapatas.poblacion())
+    }
 }
